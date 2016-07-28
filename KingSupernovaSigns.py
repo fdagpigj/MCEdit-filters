@@ -1,4 +1,3 @@
-
 import time # for timing
 from pymclevel import alphaMaterials, MCSchematic, MCLevel, TAG_String, TAG_Compound, TAG_Int, TAG_Byte
 import mcplatform
@@ -43,13 +42,16 @@ def perform(level, box, options):
 						elif data == 5:
 							x += -1
 					try:
-						name = json.loads(e["Text1"].value)["text"] + json.loads(e["Text2"].value)["text"]
+						#name = json.loads(e["Text1"].value)["text"] + json.loads(e["Text2"].value)["text"]
+						name = json.loads(e["Text1"].value)["text"].encode('utf-8') + json.loads(e["Text2"].value)["text"].encode('utf-8')
 						command = "/summon ArmorStand %s %s %s {CustomName:\"%s\",%s}" % (x,y,z, name, tags)
 						print(command)
 						for i in xrange(int(json.loads(e["Text4"].value)["text"])):
 							command_list.append(command)
 					except TypeError as error:
 						print("Skipping sign at %s %s %s due to TypeError: %s" % (x,y,z, error))
+					except ValueError as error:
+						print("Skipping sign at %s %s %s due to ValueError: %s" % (x,y,z, error))
 
 	schematic = MCSchematic((1,1,len(command_list)), mats = level.materials)
 

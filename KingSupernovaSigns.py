@@ -1,4 +1,3 @@
-
 import time # for timing
 from pymclevel import alphaMaterials, MCSchematic, MCLevel, TAG_String, TAG_Compound, TAG_Int, TAG_Byte
 import mcplatform
@@ -10,6 +9,7 @@ inputs = [(
 		("Require redstone", False),
 		("Include Marker:1b,Invisible:1,Invulnerable:1,NoGravity:1", True),
 		("Additional tags", ("string", "width=350")),
+		("Remove last char from first line", False),
 		("This filter finds all signs in the selected region and if they have a number on the last line, creates a chain command block to summon an armor stand at the sign (or the block the sign is attached to in the case of wall signs) with a CustomName name taken from the first two lines. The output is a schematic file.", "label"),
 	)]
 
@@ -43,13 +43,32 @@ def perform(level, box, options):
 						elif data == 5:
 							x += -1
 					try:
-						name = json.loads(e["Text1"].value)["text"] + json.loads(e["Text2"].value)["text"]
-						command = "/summon ArmorStand %s %s %s {CustomName:\"%s\",%s}" % (x,y,z, name, tags)
-						print(command)
-						for i in xrange(int(json.loads(e["Text4"].value)["text"])):
+						#name = json.loads(e["Text1"].value)["text"] + json.loads(e["Text2"].value)["text"]
+						print(e["Text1"].value)
+						print(e["Text2"].value)
+						try:
+							name = (json.loads(e["Text1"].value)["text"].encode('utf-8')
+							 + json.loads(e["Text2"].value)["text"].encode('utf-8'))
+							command = "/summon ArmorStand %s %s %s {CustomName:\"%s\",%s}" % (x,y,z, name, tags)
+							print(command)
+							a = 0
+						except ValueError:
+							print("removing first and last character of each line on the sign")
+							name = (json.loads(e["Text1"].value[1:-1])["text"].encode('utf-8')
+							 + json.loads(e["Text2"].value[1:-1])["text"].encode('utf-8'))
+							command = "/summon ArmorStand %s %s %s {CustomName:\"%s\",%s}" % (x,y,z, name, tags)
+							print(command)
+							a = 1
+						if a == 0:
+							range_ = xrange(int(json.loads(e["Text4"].value)["text"]))
+						else:
+							range_ = xrange(int(json.loads(e["Text4"].value[1:-1])["text"]))
+						for i in range_:
 							command_list.append(command)
 					except TypeError as error:
 						print("Skipping sign at %s %s %s due to TypeError: %s" % (x,y,z, error))
+					except ValueError as error:
+						print("Skipping sign at %s %s %s due to ValueError: %s" % (x,y,z, error))
 
 	schematic = MCSchematic((1,1,len(command_list)), mats = level.materials)
 

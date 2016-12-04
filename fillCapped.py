@@ -5,8 +5,8 @@ from mcplatform import *
 displayName = "Fill Underneath"
 
 inputs = (
-		("Fill blocks underneath", alphaMaterials[201, 0]),#air
-		("with", alphaMaterials[201, 0]),#still water
+		("Fill blocks underneath", alphaMaterials[201, 0]),#purpur
+		("with", alphaMaterials[201, 0]),
 		("Break at non-air", True)
 )
 
